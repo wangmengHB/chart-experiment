@@ -1,0 +1,46 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true, 
+		"suppressImplicitAnyIndexErrors": true,
+		"noImplicitReturns": true,
+		// "noUnusedLocals": true,
+		"noImplicitThis": true,
+		"alwaysStrict": true,
+		"strictBindCallApply": true,
+		
+		"forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "strictNullChecks": false,
+    
+    "experimentalDecorators": true,
+    "jsx": "react",
+    // "noImplicitAny": true,
+    "target": "es6",
+    "module": "commonjs",
+    "lib": [
+      "dom",
+      "es7",
+      "es2015.iterable"
+    ],
+    "removeComments": true,
+		"preserveConstEnums": true,
+		"sourceMap": false,
+    "outDir": "../out",
+    "moduleResolution": "node",
+    "baseUrl": ".",
+    "paths": {
+			"src/*": ["src/*"]
+		},
+  },
+  "include": [
+    "**/*.ts",
+    "./test/**/*", "src/demo10/index.ts",
+	],
+  "exclude": [
+    "node_modules",
+    "lib",
+    "es",
+  ]
+}
