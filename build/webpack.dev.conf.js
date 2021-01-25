@@ -24,7 +24,7 @@ const config = merge(base, {
     },
     plugins: [
         new HtmlWebpackPlugin({
-          title: 'test util function',
+          title: 'chart playground',
           inject: 'body',
           template: path.join(__dirname, './index.html'),
         }),

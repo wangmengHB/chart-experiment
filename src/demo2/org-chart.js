@@ -181,7 +181,7 @@ class TreeChart {
         
 
         console.log(attrs.root);
-        debugger;
+        
 
         // Set child nodes enter appearance positions
         attrs.root.x0 = 0;
@@ -194,7 +194,7 @@ class TreeChart {
 
 
         console.log('allNodes', attrs.allNodes);
-        debugger;
+        
 
         // Assign direct children and total subordinate children's cound
         attrs.allNodes.forEach(d => {

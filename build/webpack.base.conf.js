@@ -4,7 +4,7 @@ const path = require('path')
 module.exports = {
     context: path.resolve(__dirname, '../'),
     entry: {
-      'chart-playground': path.resolve(__dirname, '../src/demo1'),
+      'chart-playground': path.resolve(__dirname, '../src/demo2'),
     },
     output: {
         path: path.resolve(__dirname, '../dist'),

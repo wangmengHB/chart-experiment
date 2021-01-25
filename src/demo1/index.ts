@@ -18,6 +18,30 @@ document.body.appendChild(container);
 
 
 
+const ul = d3.select('#chart-demo')
+            .append('ul');
+
+ul.append('li');
+ul.append('li');
+
+// ul.selectAll('li').data([1,2,3]).text(d => 'data is ' + d).enter().append('li').text(d => 'data is ' + d);
+
+
+ul.selectAll("li")
+   .data([10, 20, 30, 25, 15])
+   .text(function(d) { return "This is pre-existing element and the value is " + d; })
+   .enter()
+   .append("li")
+   .text(function(d) 
+      { return "This is dynamically created element and the value is " + d; });
+
+ul.selectAll("li")
+    .data([10, 20, 30,])
+    .exit()
+    .remove();
+    
+
+
 
 const chart = new OrgChart();
 
@@ -26,6 +50,9 @@ const chart = new OrgChart();
     .svgWidth(WIDTH)
     .svgHeight(HEIGHT)
     .initialZoom(0.6)
-    .onNodeClick(d=> console.log(d+' node clicked'))
+    .onNodeClick(d=> {
+        console.log(d+' node clicked');
+        console.log(d);
+    })
     .render();
 
