@@ -13,7 +13,7 @@ const MARGIN = {
 
 const DIMENSIONS = {
     width: 800,
-    height: 600,
+    height: 800,
 };
 
 const OPTIONS = {
@@ -307,6 +307,9 @@ export default class OrgTreeChart{
         })
             .attr('in', 'SourceGraphic')
 
+        
+        
+
         // Display tree contenrs
         this.update(this.root)
 
@@ -347,7 +350,6 @@ export default class OrgTreeChart{
         y
     }) {
 
-        
         //  Assigns the x and y position for the nodes
         const treeData = this.treemap(this.root);
 
