@@ -73,7 +73,10 @@ const mock1 = [
     {id: "Tartarus", parentId: "Chaos"},
     {id: "Mountains", parentId: "Gaia"},
     {id: "Pontus", parentId: "Gaia"},
-    {id: "Uranus", parentId: "Gaia"}
+    {id: "Uranus", parentId: "Gaia"},
+    {id: "new-node1", parentId: "Tartarus"},
+    {id: "new-node2", parentId: "Tartarus"},
+
 ];
 
 
