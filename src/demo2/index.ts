@@ -6,7 +6,7 @@ import MyChart from './org-chart';
 
 
 const list = require('./data.json');
-const data = list.slice(0, 20);
+const data = list.slice(0);
 
 (window as any).d3 = d3;
 
@@ -31,12 +31,13 @@ const chart = new OrgChart();
     .svgHeight(HEIGHT)
     .initialZoom(0.6)
     .onNodeClick(d=> {
-        console.log(d+' node clicked');
-        console.log(d);
+        // console.log(d+' node clicked');
+        // console.log(d);
     });
 
 
 chart.render();
+(window as any).chart2 = chart;
 
 // const chart2 = new OrgTreeChart(document.getElementById('chart-demo'));
 // chart2.data(data.map(item => ({...item, width: 100, height: 80})));
@@ -60,7 +61,7 @@ let chaos = d3.stratify()([
 const root = document.getElementById('chart-demo');
 
 root.className = 'chart-container';
-root.style.width = `${WIDTH}px`;
+root.style.width = `100%`;
 root.style.height = `${HEIGHT}px`;
 
 // root.appendChild(chartDemo());
@@ -107,9 +108,14 @@ const mock3 = [
 ];
 
 
+const mock4 = data.map(item => ({
+    ...item,
+    id: item.nodeId,
+    parentId: item.parentNodeId,
+}));
 
 const myChart = new MyChart(root, WIDTH, HEIGHT);
-myChart.data(mock1).render();
+myChart.data(mock4).render();
 
 
 

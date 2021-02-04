@@ -18,7 +18,11 @@ export const MAX_NODE_WIDTH = 200;
 export const MAX_NODE_HEIGHT = 200;
 
 export const VIEWMODE_H = 'h';
-export const VIEWMODE_V = 'w';
+export const VIEWMODE_V = 'v';
+
+export const MIN_FACTOR = 0.1;
+export const MAX_FACTOR = 10;
+export const ZOOM_STEP = 0.1;
 
 
 // 每一级的宽度递减

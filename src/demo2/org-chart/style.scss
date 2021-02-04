@@ -3,9 +3,11 @@
 
 $-bg-color: rgba(0,0,100,0.1);
 
+
 .org-chart{
 
   background: #eee;
+  overflow: hidden;
 
   background-image: linear-gradient(
       90deg,

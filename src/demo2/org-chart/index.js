@@ -2,21 +2,28 @@
 
 import {
   select, stratify, hierarchy, tree, min, max,
-  extent, cluster, selection, scaleLinear, linkHorizontal
+  extent, cluster, selection, scaleLinear, linkHorizontal,
+  zoom,
 } from 'd3';
 import {
   MARGIN, LINE_COLOR, RECT_COLOR,
   NODE_WIDTH, NODE_HEIGHT,
   VIEWMODE_H, VIEWMODE_V,
+  MIN_FACTOR, MAX_FACTOR, ZOOM_STEP,
 } from './config';
 import { treeLineV, treeLineH, createChartNode, updateChartNode } from './helper';
 import './style.scss';
+import { generateUuid, objects, numbers } from 'util-kit';
+
+const { deepClone } = objects;
+const { clamp } = numbers;
 
 const noop = () => {};
 
 
 
 export default class OrgChart {
+
     // list data passed in
     rawData = null;
     // hierarchy data
@@ -27,8 +34,13 @@ export default class OrgChart {
     viewMode = VIEWMODE_V;   // 'v' | 'h'
     xValue = d => d.x;
     yValue = d => d.y;
-    xRatio = 1;
-    yRatio = 1;
+    
+    // used to zoom the chart
+    factor = 1;
+    center = {
+      x: 0,
+      y: 0,
+    }
 
     svg = null;
     rootGroup = null;
@@ -46,11 +58,26 @@ export default class OrgChart {
       this.width = width;
       this.height = height;
       this.svg = select(container)
-                  .append('svg').attr("viewBox", [0, 0, width, height])
-                  .classed('org-chart', true);
-      this.rootGroup = this.svg.append("g")
+                  .classed('org-chart', true)
+                  .append('svg')
+                    // .attr("viewBox", [0, 0, width, height])
+                    .attr('width', this.width)
+                    .attr('height', this.height)
+                    .attr('cursor', 'move')
+
+      // set margin for the main drawing area
+      const main = this.svg.append("g")
               .attr("font-family", "sans-serif")
-              .attr("font-size", 10);
+              .attr("font-size", 10)
+              .classed('main', true)
+              .attr('transform', `translate(${MARGIN.left}, ${MARGIN.top})`);
+      
+      // handle the zoom behavior from event
+      const outer = main.append('g').classed('outer', true);
+
+      // handle the zoom factor from data
+      this.rootGroup = outer.append('g').classed('root', true);
+
 
       this.lineGroup = this.rootGroup.append("g")
               .attr("fill", "none")
@@ -62,6 +89,10 @@ export default class OrgChart {
               .attr("stroke-linejoin", "round")
               .attr("stroke-width", 3)
               .classed('shape-group', true);
+
+      // bind the zoom behavior
+      const zoomFn = zoom().on("zoom", (e) => outer.attr('transform', e.transform))
+      this.svg.call(zoomFn);
 
 
       const resizeObserver = new ResizeObserver(entries => {
@@ -76,16 +107,18 @@ export default class OrgChart {
     updateSize(width, height) {
       this.width = width;
       this.height = height;
-      this.SIZE = [width, height];
-      this.svg.attr("viewBox", [0, 0, width, height]);
+      this.svg.attr('width', this.width)
+              .attr('height', this.height);
       this.calcLayout();
       this.render();
     }
 
 
-    toggleViewMode() {
-      const prev = this.viewMode;
-      if (prev === VIEWMODE_V) {
+    setViewMode(mode) {
+      if ([VIEWMODE_V, VIEWMODE_H].indexOf(mode) === -1) {
+        return;
+      }
+      if (mode === VIEWMODE_H) {
         this.viewMode = VIEWMODE_H;
         this.xValue = d => d.y;
         this.yValue = d => d.x;
@@ -100,7 +133,32 @@ export default class OrgChart {
     }
 
 
-    data(list) {
+    data(data) {
+
+      const list = deepClone(data);
+
+      if (!Array.isArray(list) || list.length === 0) {
+        return;
+      }
+      // clean data
+      list.forEach((item) => {
+        if (!item.parentId) {
+          delete item.parentId
+        }
+      });
+      const rootNodes = list.filter((item) => !item.parentId);
+      // 如果存在多个根节点，则补上一个 fake 根节点
+      if (rootNodes.length > 1) {
+        const fakeRootId = generateUuid();
+        const mock = { id: fakeRootId, name: '根节点' };
+        rootNodes.forEach((item) => (item.parentId = fakeRootId));
+        list.push(mock);
+      } else if (rootNodes.length < 1) {
+        alert('传入的数据列表不是一颗合法的树')
+        throw new Error('data is not a tree');
+      }
+      // -------------------
+
       this.hierarchyData = stratify()(list);
       this.calcLayout();
       return this;
@@ -121,16 +179,30 @@ export default class OrgChart {
       const [minX, maxX] = extent(list, this.xValue);
       const [minY, maxY] = extent(list, this.yValue);
 
+      const w = maxX - minX + NODE_WIDTH;
+      const h = maxY - minY + NODE_HEIGHT;
+
+      const factorX = (this.width - MARGIN.left - MARGIN.right) / w;
+      const factorY = (this.height - MARGIN.top - MARGIN.bottom) / h;
+
       this.xScaler = scaleLinear()
           .domain([minX - NODE_WIDTH/2, maxX + NODE_WIDTH/2])
-          .range([0, this.width - MARGIN.right]);
+          .range([-w/2, w/2]);
 
       this.yScaler = scaleLinear()
           .domain([minY - NODE_HEIGHT/2, maxY + NODE_HEIGHT/2])
-          .range([0, this.height - MARGIN.bottom]);
+          .range([-h/2, h/2]);
 
-      this.xRatio = (this.width - MARGIN.right - MARGIN.left) / (maxX - minX + NODE_WIDTH);
-      this.yRatio = (this.height - MARGIN.bottom - MARGIN.top) / (maxY - minY + NODE_HEIGHT);
+      console.log(`range, x: ${-w/2}, ${w/2} | y: ${-h/2}, ${h/2}`)
+      console.log(`factor x: ${factorX} | y: ${factorY}`)
+
+
+      this.center = {
+        x: w/2 ,
+        y: h/2 ,
+      }
+
+      this.setFactor(Math.min(factorX, factorY));
 
       return this;
 
@@ -160,7 +232,23 @@ export default class OrgChart {
 
       // this.calcLayout();
       this.render();
+    }
 
+
+    setFactor(factor) {
+      this.factor = clamp(factor, MIN_FACTOR, MAX_FACTOR);
+      this.rootGroup.attr('transform', `scale(${this.factor}) translate(${this.center.x}, ${this.center.y})`)
+    }
+
+
+    zoomIn() {
+      const factor = clamp(this.factor + ZOOM_STEP, MIN_FACTOR, MAX_FACTOR);
+      this.setFactor(factor);
+    }
+
+    zoomOut() {
+      const factor = clamp(this.factor - ZOOM_STEP, MIN_FACTOR, MAX_FACTOR);
+      this.setFactor(factor);
     }
 
 
@@ -168,10 +256,7 @@ export default class OrgChart {
         if (!this.treeData) {
           return this;
         }
-        // set the view offset
-        this.rootGroup
-          .attr("transform", `translate(${MARGIN.left}, ${ MARGIN.top })`);
-
+        
         // draw the links first
         const links = this.treeData.links();
 
@@ -199,8 +284,8 @@ export default class OrgChart {
           .merge(nodeUpdateSelection)
             .classed('chart-node', true)
             .attr("transform", d => `translate(${this.xScaler(this.xValue(d))},${this.yScaler(this.yValue(d))})`)
-            .each(function(d, i, nodes) {
-              updateChartNode(select(this), d, [me.xRatio, me.yRatio], {...me.behavior, toggleNode: me.toggleNode}, me.viewMode)
+            .each(function(d) {
+              updateChartNode(select(this), d, {...me.behavior, toggleNode: me.toggleNode}, me.viewMode)
             })
 
         return this;

@@ -84,9 +84,10 @@ export function treeLineV(s, t, scalers, getters) {
 
 
 
-export function getSizeByLevel(level, ratios, fixed = false) {
+export function getSizeByLevel(level, fixed = false) {
 
-  const [ xRatio, yRatio ] = ratios;
+  const xRatio = 1;
+  const yRatio = 1;
 
   // if (level === 0) {
   //   return [NODE_WIDTH * xRatio *  1.8 - NODE_PADDING, NODE_HEIGHT * yRatio * 0.6 - NODE_PADDING];
@@ -144,11 +145,18 @@ export function createChartNode() {
 }
 
 
-export function updateChartNode(nodeSelection, d, ratios, behavior, viewMode) {
+const preventWrapper = (fn, d) => (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  fn(d);
+}
+
+
+export function updateChartNode(nodeSelection, d, behavior, viewMode) {
   const { depth, height, data } = d;
   const { name, id } = data;
   const level = d.ancestors().length - 1;
-  const [node_width, node_height ] = getSizeByLevel(level, ratios, true);
+  const [node_width, node_height ] = getSizeByLevel(level, true);
 
   nodeSelection.select('rect')
       .attr('width', node_width)
@@ -173,13 +181,13 @@ export function updateChartNode(nodeSelection, d, ratios, behavior, viewMode) {
         const selection = select(this);
 
         if (selection.classed('detail')) {
-          selection.on('click', () => behavior.onNodeClick(d))
+          selection.on('click', preventWrapper(behavior.onNodeClick, d))
         }
         if (selection.classed('del')) {
-          selection.on('click', () => behavior.onNodeClick(d))
+          selection.on('click', preventWrapper(behavior.onNodeClick, d))
         }
         if (selection.classed('add')) {
-          selection.on('click', () => behavior.onNodeClick(d))
+          selection.on('click', preventWrapper(behavior.onNodeClick, d))
         }
       })
 
@@ -198,11 +206,10 @@ export function updateChartNode(nodeSelection, d, ratios, behavior, viewMode) {
   } else if (d._children && d._children.length > 0) {
     divSelection.select('.collapse-icon').text('+').classed('hidden', false);
   } else {
-    console.log(d);
     divSelection.select('.collapse-icon').classed('hidden', true);
   }
 
-  divSelection.select('.collapse-icon').on('click', () => behavior.toggleNode(d));
+  divSelection.select('.collapse-icon').on('click', preventWrapper(behavior.toggleNode, d));
 
 
 

@@ -42,3 +42,13 @@ const data = [mock1, mock2, mock3]
 data.forEach((mock) => {
   mock.forEach((item) => (item.name = item.id))
 })
+
+
+const MOCK_LIST = [mock1, mock2, mock3];
+let index = 0;
+
+export function getMockOrgData() {
+  index++
+  index = index % 3
+  return MOCK_LIST[index];
+}
