@@ -8,14 +8,10 @@ export const MARGIN = {
 };
 
 
-export const NODE_WIDTH = 200;
-export const NODE_HEIGHT = 200;
-
+export const NODE_FIXED_SIZE = 200;
 export const NODE_PADDING = 20;
-export const MIN_NODE_WIDTH = 30;
-export const MIN_NODE_HEIGHT = 30;
-export const MAX_NODE_WIDTH = 200;
-export const MAX_NODE_HEIGHT = 200;
+export const PADDING_RATIO = 0.9
+export const RECT_RATIO = 1.4;      // w/h: 矩形的宽高比
 
 export const VIEWMODE_H = 'h';
 export const VIEWMODE_V = 'v';
@@ -24,11 +20,7 @@ export const MIN_FACTOR = 0.1;
 export const MAX_FACTOR = 10;
 export const ZOOM_STEP = 0.1;
 
-
-// 每一级的宽度递减
-export const DECLINING = 30;
-
-
+// style for drawing
 export const LINE_COLOR = 'rgba(0,0,100, 1)';
 export const RECT_COLOR = 'rgb(51, 182, 208)';
 

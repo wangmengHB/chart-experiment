@@ -67,7 +67,11 @@
     "ws": "^7.2.0"
   },
   "dependencies": {
+    "@ant-design/icons-svg": "^4.1.0",
     "d3": "^6.3.1",
+    "dom-to-image": "^2.6.0",
+    "html2canvas": "^1.0.0-rc.7",
+    "save-svg-as-png": "^1.4.17",
     "util-kit": "^0.1.4"
   }
 }

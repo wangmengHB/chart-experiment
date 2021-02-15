@@ -115,7 +115,7 @@ const mock4 = data.map(item => ({
 }));
 
 const myChart = new MyChart(root, WIDTH, HEIGHT);
-myChart.data(mock4).render();
+myChart.data(mock1).render();
 
 
 
@@ -123,5 +123,7 @@ myChart.data(mock4).render();
 (window as any).mock2 = mock2;
 (window as any).mock3 = mock3;
 (window as any).myChart = myChart;
+
+(window as any).mock4 = mock4
 
 

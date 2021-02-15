@@ -1,16 +1,16 @@
 /* eslint-disable */
-import { level } from 'chalk';
+
 import { select, create } from 'd3';
-import { numbers } from 'util-kit';
 import {
-  RECT_COLOR, NODE_PADDING, MARGIN,
-  MIN_NODE_WIDTH, MIN_NODE_HEIGHT, DECLINING, MAX_NODE_WIDTH, NODE_WIDTH, NODE_HEIGHT,
+  RECT_COLOR, 
+  NODE_PADDING, NODE_FIXED_SIZE, PADDING_RATIO, RECT_RATIO,
   VIEWMODE_H, VIEWMODE_V,
 } from './config'
+import { numbers } from 'util-kit';
 
 const { clamp } = numbers;
 
-const identify =  _ => _;
+
 
 
 // Generate custom diagonal - play with it here - https://observablehq.com/@bumbeishvili/curved-edges?collection=@bumbeishvili/work-components
@@ -84,31 +84,25 @@ export function treeLineV(s, t, scalers, getters) {
 
 
 
-export function getSizeByLevel(level, fixed = false) {
+export function getSizeByLevel(viewMode, level, custmize = false) {
 
-  const xRatio = 1;
-  const yRatio = 1;
+  const size = [ NODE_FIXED_SIZE, NODE_FIXED_SIZE ];
+  let result = size.map(item => item * clamp(PADDING_RATIO, 0, 1) - NODE_PADDING);
 
-  // if (level === 0) {
-  //   return [NODE_WIDTH * xRatio *  1.8 - NODE_PADDING, NODE_HEIGHT * yRatio * 0.6 - NODE_PADDING];
+  
+  if (custmize) {
+    // TODO: 如果需要定制每一层的尺寸，需要实现这个部分：  
+
+  }
+
+  // 期望是个矩形, 缩小高度
+  result[1] = result[1] / clamp(RECT_RATIO, 1, 1000); 
+  
+  // if (viewMode === VIEWMODE_H) {
+  //   result = result.reverse();
   // }
 
-  if (fixed) {
-    return [NODE_WIDTH * xRatio * 0.9 - NODE_PADDING, NODE_HEIGHT * yRatio * 0.9 - NODE_PADDING];
-  }
-
-  if (level === 1) {
-    return [NODE_WIDTH * xRatio *  0.9 - NODE_PADDING, NODE_HEIGHT * yRatio * 0.8 - NODE_PADDING];
-  }
-
-  if (level === 2) {
-    return [NODE_WIDTH * xRatio *  0.8 - NODE_PADDING, NODE_HEIGHT * yRatio * 0.9 - NODE_PADDING];
-  }
-
-  if (level >= 3) {
-    return [NODE_WIDTH * xRatio *  0.6 - NODE_PADDING, NODE_HEIGHT * yRatio - NODE_PADDING];
-  }
-
+  return result;
 
 }
 
@@ -156,7 +150,7 @@ export function updateChartNode(nodeSelection, d, behavior, viewMode) {
   const { depth, height, data } = d;
   const { name, id } = data;
   const level = d.ancestors().length - 1;
-  const [node_width, node_height ] = getSizeByLevel(level, true);
+  const [node_width, node_height ] = getSizeByLevel(viewMode, level);
 
   nodeSelection.select('rect')
       .attr('width', node_width)
@@ -210,8 +204,6 @@ export function updateChartNode(nodeSelection, d, behavior, viewMode) {
   }
 
   divSelection.select('.collapse-icon').on('click', preventWrapper(behavior.toggleNode, d));
-
-
 
 
 }

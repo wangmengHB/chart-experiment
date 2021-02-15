@@ -6,20 +6,29 @@ import {
   zoom,
 } from 'd3';
 import {
-  MARGIN, LINE_COLOR, RECT_COLOR,
-  NODE_WIDTH, NODE_HEIGHT,
+  MARGIN, LINE_COLOR,
+  NODE_FIXED_SIZE, NODE_FIXED_SIZE,
   VIEWMODE_H, VIEWMODE_V,
   MIN_FACTOR, MAX_FACTOR, ZOOM_STEP,
 } from './config';
 import { treeLineV, treeLineH, createChartNode, updateChartNode } from './helper';
 import './style.scss';
-import { generateUuid, objects, numbers } from 'util-kit';
+import { generateUuid, objects, numbers, decorators } from 'util-kit';
+import { DownloadOutlined } from '@ant-design/icons-svg';
+import { renderIconDefinitionToSVGElement } from '@ant-design/icons-svg/es/helpers';
+import domtoimage from 'dom-to-image';
+
+const downloadIcon = renderIconDefinitionToSVGElement(DownloadOutlined, {
+  extraSVGAttrs: { width: '1em', height: '1em', fill: 'currentColor' }
+});
+
+
 
 const { deepClone } = objects;
 const { clamp } = numbers;
+const { debounce } = decorators;
 
 const noop = () => {};
-
 
 
 export default class OrgChart {
@@ -40,7 +49,7 @@ export default class OrgChart {
     center = {
       x: 0,
       y: 0,
-    }
+    };
 
     svg = null;
     rootGroup = null;
@@ -63,7 +72,10 @@ export default class OrgChart {
                     // .attr("viewBox", [0, 0, width, height])
                     .attr('width', this.width)
                     .attr('height', this.height)
-                    .attr('cursor', 'move')
+                    .attr('cursor', 'move');
+      
+      this.downloadBtn = select(container).append('div').classed('download', true).html(downloadIcon);
+      this.downloadBtn.on('click', this.downloadImage.bind(this))
 
       // set margin for the main drawing area
       const main = this.svg.append("g")
@@ -92,7 +104,7 @@ export default class OrgChart {
 
       // bind the zoom behavior
       const zoomFn = zoom().on("zoom", (e) => outer.attr('transform', e.transform))
-      this.svg.call(zoomFn);
+      this.svg.call(zoomFn).on("dblclick.zoom", null);
 
 
       const resizeObserver = new ResizeObserver(entries => {
@@ -102,8 +114,11 @@ export default class OrgChart {
         }
       });
       resizeObserver.observe(this.container);
+
+      // this.updateSize = this.updateSize.bind(this);
     }
 
+    @debounce(10)
     updateSize(width, height) {
       this.width = width;
       this.height = height;
@@ -173,24 +188,24 @@ export default class OrgChart {
 
       // MAX NODE SIZE:
       // Suppose the same width and height, then use scaleLinear to adjust width
-      this.treeData = tree().nodeSize([NODE_WIDTH, NODE_HEIGHT])(this.hierarchyData);
+      this.treeData = tree().nodeSize([NODE_FIXED_SIZE, NODE_FIXED_SIZE])(this.hierarchyData);
       const list = this.treeData.descendants();
 
       const [minX, maxX] = extent(list, this.xValue);
       const [minY, maxY] = extent(list, this.yValue);
 
-      const w = maxX - minX + NODE_WIDTH;
-      const h = maxY - minY + NODE_HEIGHT;
+      const w = maxX - minX + NODE_FIXED_SIZE;
+      const h = maxY - minY + NODE_FIXED_SIZE;
 
       const factorX = (this.width - MARGIN.left - MARGIN.right) / w;
       const factorY = (this.height - MARGIN.top - MARGIN.bottom) / h;
 
       this.xScaler = scaleLinear()
-          .domain([minX - NODE_WIDTH/2, maxX + NODE_WIDTH/2])
+          .domain([minX - NODE_FIXED_SIZE/2, maxX + NODE_FIXED_SIZE/2])
           .range([-w/2, w/2]);
 
       this.yScaler = scaleLinear()
-          .domain([minY - NODE_HEIGHT/2, maxY + NODE_HEIGHT/2])
+          .domain([minY - NODE_FIXED_SIZE/2, maxY + NODE_FIXED_SIZE/2])
           .range([-h/2, h/2]);
 
       console.log(`range, x: ${-w/2}, ${w/2} | y: ${-h/2}, ${h/2}`)
@@ -293,6 +308,21 @@ export default class OrgChart {
     }
 
 
+
+    async downloadImage() {
+      // TODO hidden the decorator elements
+      this.downloadBtn.style('display', 'none');
+      return domtoimage.toJpeg(this.container).then((base64) => {
+        const a = document.createElement('a');
+        a.target = '_blank';
+        a.href = base64;
+        a.download = "chart";
+        a.click();
+      }).finally(() => {
+        // TODO recover the decorator elements
+        this.downloadBtn.style('display', 'block');
+      })
+    }
 
 }
 
