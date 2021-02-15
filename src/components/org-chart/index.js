@@ -7,7 +7,7 @@ import {
 } from 'd3';
 import {
   MARGIN, LINE_COLOR,
-  NODE_FIXED_SIZE, NODE_FIXED_SIZE,
+  NODE_FIXED_SIZE,
   VIEWMODE_H, VIEWMODE_V,
   MIN_FACTOR, MAX_FACTOR, ZOOM_STEP,
 } from './config';
@@ -17,6 +17,8 @@ import { generateUuid, objects, numbers, decorators } from 'util-kit';
 import { DownloadOutlined } from '@ant-design/icons-svg';
 import { renderIconDefinitionToSVGElement } from '@ant-design/icons-svg/es/helpers';
 import domtoimage from 'dom-to-image';
+import { debounce } from 'lodash';
+
 
 const downloadIcon = renderIconDefinitionToSVGElement(DownloadOutlined, {
   extraSVGAttrs: { width: '1em', height: '1em', fill: 'currentColor' }
@@ -26,7 +28,7 @@ const downloadIcon = renderIconDefinitionToSVGElement(DownloadOutlined, {
 
 const { deepClone } = objects;
 const { clamp } = numbers;
-const { debounce } = decorators;
+
 
 const noop = () => {};
 
@@ -43,7 +45,7 @@ export default class OrgChart {
     viewMode = VIEWMODE_V;   // 'v' | 'h'
     xValue = d => d.x;
     yValue = d => d.y;
-    
+
     // used to zoom the chart
     factor = 1;
     center = {
@@ -73,7 +75,7 @@ export default class OrgChart {
                     .attr('width', this.width)
                     .attr('height', this.height)
                     .attr('cursor', 'move');
-      
+
       this.downloadBtn = select(container).append('div').classed('download', true).html(downloadIcon);
       this.downloadBtn.on('click', this.downloadImage.bind(this))
 
@@ -83,7 +85,7 @@ export default class OrgChart {
               .attr("font-size", 10)
               .classed('main', true)
               .attr('transform', `translate(${MARGIN.left}, ${MARGIN.top})`);
-      
+
       // handle the zoom behavior from event
       const outer = main.append('g').classed('outer', true);
 
@@ -115,10 +117,10 @@ export default class OrgChart {
       });
       resizeObserver.observe(this.container);
 
-      // this.updateSize = this.updateSize.bind(this);
+      this.updateSize = debounce(this.updateSize.bind(this), 10);
     }
 
-    @debounce(10)
+
     updateSize(width, height) {
       this.width = width;
       this.height = height;
@@ -208,10 +210,6 @@ export default class OrgChart {
           .domain([minY - NODE_FIXED_SIZE/2, maxY + NODE_FIXED_SIZE/2])
           .range([-h/2, h/2]);
 
-      console.log(`range, x: ${-w/2}, ${w/2} | y: ${-h/2}, ${h/2}`)
-      console.log(`factor x: ${factorX} | y: ${factorY}`)
-
-
       this.center = {
         x: w/2 ,
         y: h/2 ,
@@ -271,7 +269,7 @@ export default class OrgChart {
         if (!this.treeData) {
           return this;
         }
-        
+
         // draw the links first
         const links = this.treeData.links();
 

@@ -1,6 +1,6 @@
 
 $-bg-color: rgba(0,0,100,0.1);
-$-border-color: rgba(51, 182, 208, 0.8);
+$-border-color: #409EFF;
 
 
 .org-chart{
@@ -45,7 +45,10 @@ $-border-color: rgba(51, 182, 208, 0.8);
     user-select: none;
 
     .node-title{
-      padding: 0 4px;
+      padding: 0 8px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .action-panel{

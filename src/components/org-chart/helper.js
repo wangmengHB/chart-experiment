@@ -2,7 +2,7 @@
 
 import { select, create } from 'd3';
 import {
-  RECT_COLOR, 
+  RECT_COLOR,
   NODE_PADDING, NODE_FIXED_SIZE, PADDING_RATIO, RECT_RATIO,
   VIEWMODE_H, VIEWMODE_V,
 } from './config'
@@ -57,7 +57,7 @@ export function treeLineH(s, t, scalers, getters) {
   const path = `
       M ${x} ${y}
       L ${x + (ex - x)/2} ${y}
-      L ${x + (ex - x)/2} ${ey}    
+      L ${x + (ex - x)/2} ${ey}
       L ${ex} ${ey}
   `
   return path;
@@ -76,7 +76,7 @@ export function treeLineV(s, t, scalers, getters) {
   const path = `
       M ${x} ${y}
       L ${x} ${y + (ey - y)/2}
-      L ${ex} ${y + (ey - y)/2}    
+      L ${ex} ${y + (ey - y)/2}
       L ${ex} ${ey}
   `
   return path;
@@ -89,15 +89,15 @@ export function getSizeByLevel(viewMode, level, custmize = false) {
   const size = [ NODE_FIXED_SIZE, NODE_FIXED_SIZE ];
   let result = size.map(item => item * clamp(PADDING_RATIO, 0, 1) - NODE_PADDING);
 
-  
+
   if (custmize) {
-    // TODO: 如果需要定制每一层的尺寸，需要实现这个部分：  
+    // TODO: 如果需要定制每一层的尺寸，需要实现这个部分：
 
   }
 
   // 期望是个矩形, 缩小高度
-  result[1] = result[1] / clamp(RECT_RATIO, 1, 1000); 
-  
+  result[1] = result[1] / clamp(RECT_RATIO, 1, 1000);
+
   // if (viewMode === VIEWMODE_H) {
   //   result = result.reverse();
   // }
@@ -127,6 +127,14 @@ export function createChartNode() {
     <button class="btn del">Delete</button>
     <button class="btn add">add +</button>
    </div>
+   <div class="collapse-icon">
+   </div>
+  `
+
+
+  content.innerHTML = `
+   <h2 class="node-title"></h2>
+   <div class="node-desc"></div>
    <div class="collapse-icon">
    </div>
   `

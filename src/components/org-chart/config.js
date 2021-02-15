@@ -11,7 +11,7 @@ export const MARGIN = {
 export const NODE_FIXED_SIZE = 200;
 export const NODE_PADDING = 20;
 export const PADDING_RATIO = 0.9
-export const RECT_RATIO = 1.4;      // w/h: 矩形的宽高比
+export const RECT_RATIO = 1.6;      // w/h: 矩形的宽高比
 
 export const VIEWMODE_H = 'h';
 export const VIEWMODE_V = 'v';
