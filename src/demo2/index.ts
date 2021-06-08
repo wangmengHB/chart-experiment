@@ -3,7 +3,7 @@ import MyChart from '../components/org-chart';
 
 
 const list = require('./data.json');
-const data = list.slice(0);
+const data = list.slice(0, 200);
 
 const WIDTH = 1200;
 const HEIGHT = 800;
@@ -80,7 +80,7 @@ const mock4 = data.map(item => ({
 }));
 
 const myChart = new MyChart(root, WIDTH, HEIGHT);
-myChart.data(mock1).render();
+myChart.data(mock4).render();
 
 
 
